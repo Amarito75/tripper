@@ -33,7 +33,7 @@ function MapCard() {
       pickable: true,
     });
   // Map style
-  const MAP_STYLE = "mapbox://styles/mapbox/dark-v10";
+  const MAP_STYLE = "mapbox://styles/mapbox/standard";
   // Deck GL overlay
   const overlay = new DeckOverlay({
     layers: [layer()],
