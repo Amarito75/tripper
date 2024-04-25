@@ -10,6 +10,7 @@ export default function Home() {
       <Header />
       <HeroSection />
       <Info />
+      {/* <Search /> */}
     </div>
   );
 }
