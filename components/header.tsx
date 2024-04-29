@@ -1,5 +1,7 @@
 import React from "react";
 import Logo from "./ui/logo";
+import { Button } from "./ui/button";
+import Link from "next/link";
 
 const navItems = [
   {
@@ -19,14 +21,19 @@ const Header = () => {
         <Logo />
         <div className="flex justify-between space-x-8">
           {navItems.map((navItem, index) => (
-            <a
-              key={index}
-              href={navItem.href}
-              className="text-lg text-white font-semibold"
-            >
-              {navItem.label}
-            </a>
+            <>
+              <a
+                key={index}
+                href={navItem.href}
+                className="text-lg text-white font-semibold"
+              >
+                {navItem.label}
+              </a>
+            </>
           ))}
+        </div>
+        <div className="flex items-center gap-x-8">
+          <Link href={"/sign-in"}>Connect</Link>
         </div>
       </div>
     </div>

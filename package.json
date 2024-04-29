@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^5.0.3",
     "@danmarshall/deckgl-typings": "^3.0.0",
     "@nextui-org/button": "^2.0.30",
     "@radix-ui/react-slot": "^1.0.2",
