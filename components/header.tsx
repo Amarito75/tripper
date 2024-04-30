@@ -33,7 +33,7 @@ const Header = () => {
           ))}
         </div>
         <div className="flex items-center gap-x-8">
-          <Link href={"/sign-in"}>Connect</Link>
+          <Link href={"/home"}>Connect</Link>
         </div>
       </div>
     </div>
