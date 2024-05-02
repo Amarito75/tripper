@@ -9,6 +9,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
 import Image from "next/image";
+import { Combobox } from "@/components/ui/combobox";
 
 const HomePage = () => {
   const [latitude, setLatitude] = useState(0);
@@ -97,6 +98,7 @@ const HomePage = () => {
           address={""}
         />
       </div> */}
+      <Combobox />
       <Input
         value={originLocation}
         onChange={(e) => setOriginLocation(e.target.value)}

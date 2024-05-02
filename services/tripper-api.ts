@@ -25,6 +25,7 @@ export async function searchFlights(
   originLocationCode: string,
   destinationLocationCode: string
 ) {
+  const token = process.env.NEXT_PUBLIC_AMADEUS_KEY;
   const body = {
     currencyCode: "USD",
     originDestinations: [
@@ -66,7 +67,7 @@ export async function searchFlights(
         headers: {
           // "X-HTTP-Method-Override": "GET",
           // "Content-Type": "application/json",
-          Authorization: "Bearer XnHu9YuQryAFqjrN1vvd70Xlzg9e",
+          Authorization: `Bearer ${token}`,
         },
       }
     );
