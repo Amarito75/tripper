@@ -7,10 +7,7 @@ import Info from "@/components/sections/info";
 export default function Home() {
   return (
     <div>
-      <Header />
       <HeroSection />
-      <Info />
-      {/* <Search /> */}
     </div>
   );
 }

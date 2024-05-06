@@ -18,86 +18,26 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-const cities = [
+const frameworks = [
   {
-    value: "PAR",
-    label: "Paris",
+    value: "next.js",
+    label: "Next.js",
   },
   {
-    value: "NYC",
-    label: "New York",
+    value: "sveltekit",
+    label: "SvelteKit",
   },
   {
-    value: "LON",
-    label: "London",
+    value: "nuxt.js",
+    label: "Nuxt.js",
   },
   {
-    value: "TYO",
-    label: "Tokyo",
+    value: "remix",
+    label: "Remix",
   },
   {
-    value: "DXB",
-    label: "Dubai",
-  },
-  {
-    value: "LAX",
-    label: "Los Angeles",
-  },
-  {
-    value: "SYD",
-    label: "Sydney",
-  },
-  {
-    value: "SIN",
-    label: "Singapore",
-  },
-  {
-    value: "BJS",
-    label: "Beijing",
-  },
-  {
-    value: "MOW",
-    label: "Moscow",
-  },
-  {
-    value: "IST",
-    label: "Istanbul",
-  },
-  {
-    value: "RIO",
-    label: "Rio de Janeiro",
-  },
-  {
-    value: "ROM",
-    label: "Rome",
-  },
-  {
-    value: "YTO",
-    label: "Toronto",
-  },
-  {
-    value: "CAI",
-    label: "Cairo",
-  },
-  {
-    value: "BOM",
-    label: "Mumbai",
-  },
-  {
-    value: "BKK",
-    label: "Bangkok",
-  },
-  {
-    value: "BER",
-    label: "Berlin",
-  },
-  {
-    value: "MEX",
-    label: "Mexico City",
-  },
-  {
-    value: "MAD",
-    label: "Madrid",
+    value: "astro",
+    label: "Astro",
   },
 ];
 
@@ -115,20 +55,20 @@ export function Combobox() {
           className="w-[200px] justify-between"
         >
           {value
-            ? cities.find((city) => city.value === value)?.label
-            : "Select city..."}
+            ? frameworks.find((framework) => framework.value === value)?.label
+            : "Select framework..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search city..." />
-          <CommandEmpty>No city found.</CommandEmpty>
+          <CommandInput placeholder="Search framework..." />
+          <CommandEmpty>No framework found.</CommandEmpty>
           <CommandGroup>
-            {cities.map((city) => (
+            {frameworks.map((framework) => (
               <CommandItem
-                key={city.value}
-                value={city.value}
+                key={framework.value}
+                value={framework.value}
                 onSelect={(currentValue) => {
                   setValue(currentValue === value ? "" : currentValue);
                   setOpen(false);
@@ -137,10 +77,10 @@ export function Combobox() {
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    value === city.value ? "opacity-100" : "opacity-0"
+                    value === framework.value ? "opacity-100" : "opacity-0"
                   )}
                 />
-                {city.label}
+                {framework.label}
               </CommandItem>
             ))}
           </CommandGroup>

@@ -1,4 +1,5 @@
 import axios from "axios";
+import moment from "moment";
 
 export async function searchActivities(
   latitude: number,
@@ -6,11 +7,12 @@ export async function searchActivities(
   radius: number
 ) {
   try {
+    const token = process.env.NEXT_PUBLIC_AMADEUS_KEY;
     const response = await axios.get(
       `https://test.api.amadeus.com/v1/shopping/activities?latitude=${latitude}&longitude=${longitude}&radius=${radius}`,
       {
         headers: {
-          Authorization: `Bearer XnHu9YuQryAFqjrN1vvd70Xlzg9e`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -23,9 +25,13 @@ export async function searchActivities(
 
 export async function searchFlights(
   originLocationCode: string,
-  destinationLocationCode: string
+  destinationLocationCode: string,
+  cabin: string
 ) {
   const token = process.env.NEXT_PUBLIC_AMADEUS_KEY;
+  const currentTimestamp = Date.now();
+  const formattedDate = moment(currentTimestamp).format("YYYY-MM-DD");
+  const formattedTime = moment(currentTimestamp).format("HH:mm:ss");
   const body = {
     currencyCode: "USD",
     originDestinations: [
@@ -34,8 +40,8 @@ export async function searchFlights(
         originLocationCode: originLocationCode,
         destinationLocationCode: destinationLocationCode,
         departureDateTimeRange: {
-          date: "2024-11-11",
-          time: "10:00:00",
+          date: formattedDate,
+          time: formattedTime,
         },
       },
     ],
@@ -51,7 +57,7 @@ export async function searchFlights(
       flightFilters: {
         cabinRestrictions: [
           {
-            cabin: "BUSINESS",
+            cabin: cabin,
             coverage: "MOST_SEGMENTS",
             originDestinationIds: ["1"],
           },
