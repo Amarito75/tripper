@@ -12,6 +12,16 @@ import Image from "next/image";
 import { PlaceholdersAndVanishInput } from "../ui/placeholder-and-vanish-input";
 import { SearchIcon } from "lucide-react";
 import { CardProduct } from "../ui/card-product";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 interface AutocompleteResult {
   minimumDuration: string;
@@ -72,6 +82,11 @@ interface ActivitiesResults {
     amount: string;
     currencyCode: string;
   };
+  id: string;
+  geoCode: {
+    latitude: number;
+    longitude: number;
+  };
 }
 [];
 
@@ -89,6 +104,7 @@ const HeroSection = () => {
   const [searchResults, setSearchResults] = useState<SearchResults[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [cabinType, setCabinType] = useState("ECONOMY");
+  const [budgetNumber, setBudgetNumber] = useState(0);
 
   const placeholders = ["Paris", "London", "New York", "Dubai", "Hong Kong"];
 
@@ -103,6 +119,15 @@ const HeroSection = () => {
       setSearchResults(response.data.results);
     } catch (error) {
       console.error("Error fetching coordinates:", error);
+    }
+  };
+
+  const saveActivity = async (activity: any) => {
+    try {
+      await axios.post("/api/activity", activity);
+      console.log("Activity saved successfully!");
+    } catch (error) {
+      console.error("Error saving activity:", error);
     }
   };
 
@@ -146,10 +171,6 @@ const HeroSection = () => {
     getCoordinates;
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
   const handleSearchActivities = async () => {
     try {
       const response = await searchActivities(latitude, longitude, 1);
@@ -161,50 +182,114 @@ const HeroSection = () => {
     }
   };
 
+  const handleInputChange = (e: any) => {
+    setBudgetNumber(e.target.value);
+  };
+
   return (
-    <>
-      <div className="flex justify-center mt-32">
-        <span className="inline-flex animate-text-gradient bg-gradient-to-r from-[#ACACAC] via-[#363636] to-[#ACACAC] bg-[200%_auto] text-6xl text-center text-transparent font-medium bg-clip-text">
-          Find the best trip
-        </span>
-      </div>
-      <div className="mt-8 flex justify-center">
-        <div className="flex items-center border border-black/25 p-4 rounded-full w-2/5">
-          <input
-            value={locationName}
-            onChange={handleChange}
-            placeholder="Search a city"
-            className="w-full focus:outline-none"
-          />
-          <button
-            onClick={() => {
-              getCoordinates(locationName);
-              handleSearchActivities();
-            }}
-            className="bg-black p-2 rounded-full"
-          >
-            <SearchIcon className="text-white" />
-          </button>
+    <div className="h-screen">
+      <div className="relative h-1/2">
+        <Image
+          src={
+            "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          }
+          alt={"banner"}
+          className="z-0 object-cover w-full h-full"
+          layout="fill"
+        />
+        <div className="absolute inset-0 flex flex-col justify-center items-center z-10">
+          <h1 className="text-6xl text-white text-center mb-8">
+            Find your best trip
+          </h1>
+          <div className="relative flex justify-center backdrop-blur-lg p-2 rounded-full w-auto">
+            <div className="flex items-end p-4 justify-between rounded-full w-full gap-x-4">
+              <div className="flex-col items-start">
+                <h3 className="text-white uppercase text-sm">destination</h3>
+                <input
+                  value={locationName}
+                  onChange={handleChange}
+                  placeholder="Search a city"
+                  className="focus:outline-none bg-transparent placeholder:text-white border border-white p-2 rounded-full"
+                />
+              </div>
+
+              <div className="flex-col items-start">
+                <h3 className="text-white uppercase text-sm">guests</h3>
+                <Select>
+                  <SelectTrigger className="bg-transparent focus:outline-none rounded-full active:outline-none">
+                    <SelectValue
+                      placeholder="Choose number of guests"
+                      className="placeholder:text-white text-white"
+                    />
+                  </SelectTrigger>
+                  <SelectContent className="bg-transparent backdrop-blur-lg rounded-xl text-white">
+                    <SelectGroup>
+                      <SelectLabel>Guests</SelectLabel>
+                      <SelectItem value="1">1</SelectItem>
+                      <SelectItem value="2">2</SelectItem>
+                      <SelectItem value="3">3</SelectItem>
+                      <SelectItem value="4">4</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex-col items-start">
+                <h3 className="text-white uppercase text-sm">budget</h3>
+                <input
+                  type="number"
+                  placeholder="Enter your budget"
+                  value={budgetNumber}
+                  onChange={handleInputChange}
+                  className="focus:outline-none bg-transparent placeholder:text-white border border-white p-2 rounded-full text-white"
+                />
+              </div>
+
+              <button
+                onClick={() => {
+                  getCoordinates(locationName);
+                  handleSearchActivities();
+                }}
+                className="bg-black p-2 rounded-full"
+              >
+                <SearchIcon className="text-white" />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-      <p className="flex justify-center">
+      {/* <p className="flex justify-center">
         {searchResults.map((result, index) => (
           <p key={index}>{result.formatted_address}</p>
         ))}
-        {/* {searchResults[0]?.formatted_address} */}
-      </p>
+      </p> */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 m-8">
-        {activitiesResults.map((result, index) => (
-          <CardProduct
-            key={index}
-            text={result.minimumDuration}
-            price={result.price.amount}
-            image={result.pictures[0]}
-            title={result.name}
-          />
-        ))}
+        {activitiesResults &&
+          activitiesResults
+            .filter((result) => {
+              const priceAsNumber = parseFloat(result.price.amount);
+              return !isNaN(priceAsNumber) && budgetNumber >= priceAsNumber;
+            })
+            .map((result, index) => (
+              <CardProduct
+                key={index}
+                text={result.minimumDuration}
+                price={result.price.amount}
+                image={result.pictures[0]}
+                title={result.name}
+                onClick={() =>
+                  saveActivity({
+                    name: result.name,
+                    price: result.price.amount,
+                    longitude: result.geoCode.longitude,
+                    latitude: result.geoCode.latitude,
+                    activityId: result.id,
+                  })
+                }
+              />
+            ))}
       </div>
-    </>
+    </div>
   );
 };
 

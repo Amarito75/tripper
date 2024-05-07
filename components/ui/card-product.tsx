@@ -5,15 +5,24 @@ import Image from "next/image";
 import { useMotionValue, motion, useMotionTemplate } from "framer-motion";
 
 import productImage from "@/assets/background.png";
+import { PicturesCarousel } from "./pictures-carousel";
+import { MouseEventHandler } from "react";
 
 interface CardProductProps {
   text: string;
   price: string;
   image: string;
   title: string;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
-export function CardProduct({ text, price, image, title }: CardProductProps) {
+export function CardProduct({
+  text,
+  price,
+  image,
+  title,
+  onClick,
+}: CardProductProps) {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -38,19 +47,16 @@ export function CardProduct({ text, price, image, title }: CardProductProps) {
       />
       <div className="relative flex flex-col gap-3 rounded-xl border border-white/10 px-4 py-5">
         <div className="space-y-2">
-          <Image
-            src={image}
-            alt="Product image"
-            height={1000}
-            width={1000}
-            className="rounded-xl h-52 w-full object-fit"
-          />
+          <PicturesCarousel image={image} />
           <div className="flex flex-row items-center justify-between pt-2">
             <h3 className="text-xl font-semibold text-neutral-200">{title}</h3>
             <p className="text-[13px] text-neutral-300 select-none">{price}</p>
           </div>
           <p className="text-sm leading-[1.5] text-neutral-400 pb-3">{text}</p>
-          <button className="inline-flex items-center justify-center gap-1 text-sm py-3 px-4 font-semibold bg-white text-black rounded-lg duration-300 hover:bg-white/70 w-full">
+          <button
+            onClick={onClick}
+            className="inline-flex items-center justify-center gap-1 text-sm py-3 px-4 font-semibold bg-white text-black rounded-lg duration-300 hover:bg-white/70 w-full"
+          >
             Buy now
           </button>
         </div>
