@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import TripForm from "../trip-form";
 
 interface AutocompleteResult {
   minimumDuration: string;
@@ -189,19 +190,12 @@ const HeroSection = () => {
   return (
     <div className="h-screen">
       <div className="relative h-1/2">
-        <Image
-          src={
-            "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-          }
-          alt={"banner"}
-          className="z-0 object-cover w-full h-full"
-          layout="fill"
-        />
         <div className="absolute inset-0 flex flex-col justify-center items-center z-10">
-          <h1 className="text-6xl text-white text-center mb-8">
+          <h1 className="text-6xl text-black text-center mb-8">
             Find your best trip
           </h1>
-          <div className="relative flex justify-center backdrop-blur-lg p-2 rounded-full w-auto">
+          <TripForm />
+          {/* <div className="relative flex justify-center backdrop-blur-lg p-2 rounded-full w-auto">
             <div className="flex items-end p-4 justify-between rounded-full w-full gap-x-4">
               <div className="flex-col items-start">
                 <h3 className="text-white uppercase text-sm">destination</h3>
@@ -255,7 +249,7 @@ const HeroSection = () => {
                 <SearchIcon className="text-white" />
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
       {/* <p className="flex justify-center">
@@ -263,7 +257,7 @@ const HeroSection = () => {
           <p key={index}>{result.formatted_address}</p>
         ))}
       </p> */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 m-8">
+      {/* <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 m-8">
         {activitiesResults &&
           activitiesResults
             .filter((result) => {
@@ -286,9 +280,10 @@ const HeroSection = () => {
                     activityId: result.id,
                   })
                 }
+                currency={result.price.currencyCode}
               />
             ))}
-      </div>
+      </div> */}
     </div>
   );
 };

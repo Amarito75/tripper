@@ -1,5 +1,6 @@
 import axios from "axios";
 import moment from "moment";
+const token = process.env.NEXT_PUBLIC_AMADEUS_KEY;
 
 export async function searchActivities(
   latitude: number,
@@ -7,7 +8,6 @@ export async function searchActivities(
   radius: number
 ) {
   try {
-    const token = process.env.NEXT_PUBLIC_AMADEUS_KEY;
     const response = await axios.get(
       `https://test.api.amadeus.com/v1/shopping/activities?latitude=${latitude}&longitude=${longitude}&radius=${radius}`,
       {
@@ -28,7 +28,6 @@ export async function searchFlights(
   destinationLocationCode: string,
   cabin: string
 ) {
-  const token = process.env.NEXT_PUBLIC_AMADEUS_KEY;
   const currentTimestamp = Date.now();
   const formattedDate = moment(currentTimestamp).format("YYYY-MM-DD");
   const formattedTime = moment(currentTimestamp).format("HH:mm:ss");
@@ -58,7 +57,7 @@ export async function searchFlights(
         cabinRestrictions: [
           {
             cabin: cabin,
-            coverage: "MOST_SEGMENTS",
+            coverage: "AT_LEAST_ONE_SEGMENT",
             originDestinationIds: ["1"],
           },
         ],
@@ -71,14 +70,45 @@ export async function searchFlights(
       body,
       {
         headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function searchHotels(cityCode: string) {
+  try {
+    const response = await axios.get(
+      `https://test.api.amadeus.com/v1/reference-data/locations/hotels/by-city?cityCode=${cityCode}&radius=1&radiusUnit=KM&hotelSource=ALL`,
+      {
+        headers: {
           // "X-HTTP-Method-Override": "GET",
           // "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       }
     );
-    console.log(response.data);
-    return response;
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function searchHotelById(hotelId: string | null) {
+  try {
+    const response = await axios.get(
+      `https://test.api.amadeus.com/v3/shopping/hotel-offers?hotelIds=${hotelId}&adults=1&roomQuantity=1&paymentPolicy=NONE&bestRateOnly=true`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
   } catch (error) {
     console.log(error);
   }

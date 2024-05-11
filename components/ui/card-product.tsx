@@ -13,6 +13,7 @@ interface CardProductProps {
   price: string;
   image: string;
   title: string;
+  currency: string;
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
@@ -21,6 +22,7 @@ export function CardProduct({
   price,
   image,
   title,
+  currency,
   onClick,
 }: CardProductProps) {
   const mouseX = useMotionValue(0);
@@ -34,7 +36,7 @@ export function CardProduct({
         mouseX.set(e.clientX - left);
         mouseY.set(e.clientY - top);
       }}
-      className="group relative max-w-[350px] w-full overflow-hidden rounded-xl bg-neutral-950"
+      className="group relative max-w-[350px] w-full overflow-hidden rounded-xl backdrop-blur-lg bg-gray-200"
     >
       <div className="absolute right-5 top-0 h-px w-80 bg-gradient-to-l from-transparent via-white/30 via-10% to-transparent" />
       <motion.div
@@ -49,10 +51,12 @@ export function CardProduct({
         <div className="space-y-2">
           <PicturesCarousel image={image} />
           <div className="flex flex-row items-center justify-between pt-2">
-            <h3 className="text-xl font-semibold text-neutral-200">{title}</h3>
-            <p className="text-[13px] text-neutral-300 select-none">{price}</p>
+            <h3 className="text-xl font-semibold text-neutral-950">{title}</h3>
+            <p className="text-[13px] text-neutral-700 select-none">
+              {currency} {price}
+            </p>
           </div>
-          <p className="text-sm leading-[1.5] text-neutral-400 pb-3">{text}</p>
+          <p className="text-sm leading-[1.5] text-neutral-700 pb-3">{text}</p>
           <button
             onClick={onClick}
             className="inline-flex items-center justify-center gap-1 text-sm py-3 px-4 font-semibold bg-white text-black rounded-lg duration-300 hover:bg-white/70 w-full"

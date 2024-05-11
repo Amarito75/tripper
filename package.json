@@ -25,6 +25,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cmdk": "^1.0.0",
+    "date-fns": "^3.6.0",
     "deck.gl": "^8.8.20",
     "dotenv": "^16.4.5",
     "downshift": "^9.0.4",
