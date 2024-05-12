@@ -1,12 +1,12 @@
 import React from "react";
 
-interface ItemCardProps {
+interface ItemIconCardProps {
   title: string;
   text: string;
   icon: React.ReactNode;
 }
 
-const ItemCard = ({ title, text, icon }: ItemCardProps) => {
+const ItemIconCard = ({ title, text, icon }: ItemIconCardProps) => {
   return (
     <div className="flex items-start space-x-2">
       {icon}
@@ -18,4 +18,4 @@ const ItemCard = ({ title, text, icon }: ItemCardProps) => {
   );
 };
 
-export default ItemCard;
+export default ItemIconCard;

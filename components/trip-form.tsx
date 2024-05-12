@@ -1,4 +1,5 @@
 import {
+  searchActivities,
   searchFlights,
   searchHotelById,
   searchHotels,
@@ -11,6 +12,7 @@ import {
   Bed,
   Calendar,
   Clock,
+  Croissant,
   Luggage,
   MoveDown,
   MoveRight,
@@ -19,6 +21,7 @@ import {
   PlaneLanding,
   PlaneTakeoff,
   UserRound,
+  Users,
 } from "lucide-react";
 import { format, formatDate, formatDuration, parseISO } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -26,7 +29,7 @@ import { formatCustomDuration, timeFormatter } from "@/lib/formatter";
 import MapCard from "./map";
 import { Separator } from "./ui/separator";
 import { Badge } from "./ui/badge";
-import ItemCard from "./ui/item-card";
+import ItemCard from "./ui/item-icon-card";
 
 interface FlightResults {
   lastTicketingDate: string;
@@ -92,10 +95,31 @@ interface SearchResults {
 }
 [];
 
+interface ActivitiesResults {
+  name: string;
+  pictures: string;
+  minimumDuration: string;
+  bookingLink: string;
+  price: {
+    amount: string;
+    currencyCode: string;
+  };
+  id: string;
+  geoCode: {
+    latitude: number;
+    longitude: number;
+  };
+}
+[];
+
 const TripForm = () => {
   const [flightResults, setFlightsResults] = useState<FlightResults[]>([]);
   const [hotelResults, setHotelResults] = useState<HotelsResults[]>([]);
   const [hotelIdResult, setHotelIdResult] = useState<HotelIdResult[]>([]);
+  const [activitiesResults, setActivitiesResults] = useState<
+    ActivitiesResults[]
+  >([]);
+
   const [originLocation, setOriginLocation] = useState("");
   const [destinationLocation, setDestinationLocation] = useState("");
   const [latitude, setLatitude] = useState(0);
@@ -131,6 +155,17 @@ const TripForm = () => {
     }
   };
 
+  const handleSearchActivities = async () => {
+    try {
+      const response = await searchActivities(51.50988, -0.15509, 1);
+      console.log("ACTIVITES: ", response?.data.data);
+      setActivitiesResults(response?.data?.data);
+      console.log(typeof activitiesResults);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleSearchHotelsById = async () => {
     try {
       const response = await searchHotelById("MCLONGHM");
@@ -157,6 +192,7 @@ const TripForm = () => {
   const onClick = () => {
     handleSearchFlights();
     handleSearchHotels();
+    handleSearchActivities();
   };
 
   useEffect(() => {
@@ -343,7 +379,7 @@ const TripForm = () => {
                 <Separator />
                 <div className="flex-col items-start m-4 py-4">
                   <h1 className="text-white text-lg font-semibold">Details</h1>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between my-4">
                     <ItemCard
                       title={"From"}
                       text={
@@ -375,7 +411,7 @@ const TripForm = () => {
                   </div>
                   <Separator />
                   <h1 className="text-white text-lg font-semibold">Room</h1>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between my-4">
                     <ItemCard
                       title={"Type Bed"}
                       text={"Queen size"}
@@ -385,20 +421,17 @@ const TripForm = () => {
                     />
 
                     <ItemCard
-                      title={"To"}
-                      text={
-                        timeFormatter(hotelIdResult[0].offers[0].checkInDate)
-                          .formattedDate
-                      }
+                      title={"Breakfast"}
+                      text={"Yes"}
                       icon={
-                        <Calendar className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                        <Croissant className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
                       }
                     />
                     <ItemCard
-                      title={"Person"}
-                      text={"1"}
+                      title={"Check-In"}
+                      text={"From 11h to 23h"}
                       icon={
-                        <UserRound className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                        <Clock className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
                       }
                     />
                   </div>
@@ -417,8 +450,8 @@ const TripForm = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="">
+                <div className="flex items-center justify-between px-4 my-4 ">
+                  <div className="z-50">
                     <Badge>CACA</Badge>
                     <Badge>CACA</Badge> <Badge>CACA</Badge>
                   </div>
@@ -433,6 +466,65 @@ const TripForm = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+      {activitiesResults && activitiesResults.length > 0 && (
+        <div className="mt-8 space-y-4 mb-4">
+          <h1 className="text-3xl text-black font-bold">Activity</h1>
+          <Separator />
+          <div className="bg-black rounded-xl shadow-lg shadow-black/25 p-4 mt-2 border border-gray-400">
+            <div className="flex-col items-center justify-center px-4 my-2">
+              <h1 className="text-xl text-white font-semibold py-1">
+                {activitiesResults[0].name}
+              </h1>
+              <Separator />
+              <h2 className="text-white text-xl font-semibold my-4 place-self-start">
+                Details
+              </h2>
+              <div className="flex items-center justify-between">
+                <ItemCard
+                  title={"Duration"}
+                  text={activitiesResults[0].minimumDuration}
+                  icon={
+                    <Clock className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                  }
+                />
+                <ItemCard
+                  title={"In Group"}
+                  text={"No"}
+                  icon={
+                    <Users className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                  }
+                />
+                <ItemCard
+                  title={"Time"}
+                  text={`From 15h to 17h30`}
+                  icon={
+                    <Clock className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                  }
+                />
+              </div>
+              <div className="">
+                <h2 className="text-white text-xl font-semibold my-4 place-self-start">
+                  Emplacement
+                </h2>
+                <div className="relative w-full h-48 rounded-full">
+                  <MapCard
+                    latitude={activitiesResults[0].geoCode.latitude}
+                    longitude={activitiesResults[0].geoCode.longitude}
+                    name={""}
+                    address={""}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end my-2">
+                <h1 className="text-2xl text-white">
+                  {activitiesResults[0].price.currencyCode}{" "}
+                  {activitiesResults[0].price.amount} / person
+                </h1>
+              </div>
+            </div>
           </div>
         </div>
       )}

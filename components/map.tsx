@@ -41,8 +41,8 @@ function MapCard({ latitude, longitude, name, address }: MapCardProps) {
   const INITIAL_VIEW_STATE = {
     longitude: longitude,
     latitude: latitude,
-    zoom: 10,
-    maxZoom: 16,
+    zoom: 15,
+    maxZoom: 15,
     pitch: 0,
     bearing: 0,
   };

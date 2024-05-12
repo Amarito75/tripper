@@ -1,27 +1,8 @@
 "use client";
 
-import MapCard from "@/components/map";
-import { Button } from "@/components/ui/button";
-import { ImagesSlider } from "@/components/ui/images-slider";
-import { Input } from "@/components/ui/input";
 import { searchActivities, searchFlights } from "@/services/tripper-api";
 import axios from "axios";
-import { motion } from "framer-motion";
 import React, { useState } from "react";
-import Image from "next/image";
-import { PlaceholdersAndVanishInput } from "../ui/placeholder-and-vanish-input";
-import { SearchIcon } from "lucide-react";
-import { CardProduct } from "../ui/card-product";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
 import TripForm from "../trip-form";
 
 interface AutocompleteResult {
