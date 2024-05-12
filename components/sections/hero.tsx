@@ -189,101 +189,12 @@ const HeroSection = () => {
 
   return (
     <div className="h-screen">
-      <div className="relative h-1/2">
-        <div className="absolute inset-0 flex flex-col justify-center items-center z-10">
-          <h1 className="text-6xl text-black text-center mb-8">
-            Find your best trip
-          </h1>
-          <TripForm />
-          {/* <div className="relative flex justify-center backdrop-blur-lg p-2 rounded-full w-auto">
-            <div className="flex items-end p-4 justify-between rounded-full w-full gap-x-4">
-              <div className="flex-col items-start">
-                <h3 className="text-white uppercase text-sm">destination</h3>
-                <input
-                  value={locationName}
-                  onChange={handleChange}
-                  placeholder="Search a city"
-                  className="focus:outline-none bg-transparent placeholder:text-white border border-white p-2 rounded-full"
-                />
-              </div>
-
-              <div className="flex-col items-start">
-                <h3 className="text-white uppercase text-sm">guests</h3>
-                <Select>
-                  <SelectTrigger className="bg-transparent focus:outline-none rounded-full active:outline-none">
-                    <SelectValue
-                      placeholder="Choose number of guests"
-                      className="placeholder:text-white text-white"
-                    />
-                  </SelectTrigger>
-                  <SelectContent className="bg-transparent backdrop-blur-lg rounded-xl text-white">
-                    <SelectGroup>
-                      <SelectLabel>Guests</SelectLabel>
-                      <SelectItem value="1">1</SelectItem>
-                      <SelectItem value="2">2</SelectItem>
-                      <SelectItem value="3">3</SelectItem>
-                      <SelectItem value="4">4</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex-col items-start">
-                <h3 className="text-white uppercase text-sm">budget</h3>
-                <input
-                  type="number"
-                  placeholder="Enter your budget"
-                  value={budgetNumber}
-                  onChange={handleInputChange}
-                  className="focus:outline-none bg-transparent placeholder:text-white border border-white p-2 rounded-full text-white"
-                />
-              </div>
-
-              <button
-                onClick={() => {
-                  getCoordinates(locationName);
-                  handleSearchActivities();
-                }}
-                className="bg-black p-2 rounded-full"
-              >
-                <SearchIcon className="text-white" />
-              </button>
-            </div>
-          </div> */}
-        </div>
+      <h1 className="text-6xl text-black text-center my-8">
+        Find your best trip
+      </h1>
+      <div className="flex justify-center items-center ">
+        <TripForm />
       </div>
-      {/* <p className="flex justify-center">
-        {searchResults.map((result, index) => (
-          <p key={index}>{result.formatted_address}</p>
-        ))}
-      </p> */}
-      {/* <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 m-8">
-        {activitiesResults &&
-          activitiesResults
-            .filter((result) => {
-              const priceAsNumber = parseFloat(result.price.amount);
-              return !isNaN(priceAsNumber) && budgetNumber >= priceAsNumber;
-            })
-            .map((result, index) => (
-              <CardProduct
-                key={index}
-                text={result.minimumDuration}
-                price={result.price.amount}
-                image={result.pictures[0]}
-                title={result.name}
-                onClick={() =>
-                  saveActivity({
-                    name: result.name,
-                    price: result.price.amount,
-                    longitude: result.geoCode.longitude,
-                    latitude: result.geoCode.latitude,
-                    activityId: result.id,
-                  })
-                }
-                currency={result.price.currencyCode}
-              />
-            ))}
-      </div> */}
     </div>
   );
 };

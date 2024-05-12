@@ -8,14 +8,25 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import axios from "axios";
 import {
+  Bed,
+  Calendar,
+  Clock,
+  Luggage,
   MoveDown,
   MoveRight,
+  PersonStanding,
   Plane,
   PlaneLanding,
   PlaneTakeoff,
+  UserRound,
 } from "lucide-react";
-import { format, formatDuration, parseISO } from "date-fns";
+import { format, formatDate, formatDuration, parseISO } from "date-fns";
 import { enUS } from "date-fns/locale";
+import { formatCustomDuration, timeFormatter } from "@/lib/formatter";
+import MapCard from "./map";
+import { Separator } from "./ui/separator";
+import { Badge } from "./ui/badge";
+import ItemCard from "./ui/item-card";
 
 interface FlightResults {
   lastTicketingDate: string;
@@ -46,12 +57,16 @@ interface FlightResults {
 interface HotelIdResult {
   hotel: {
     name: string;
+    latitude: number;
+    longitude: number;
   };
   offers: {
     price: {
       currency: string;
       total: string;
     };
+    checkInDate: string;
+    checkOutDate: string;
   }[];
 }
 [];
@@ -109,6 +124,7 @@ const TripForm = () => {
         destinationLocation,
         "ECONOMY"
       );
+      console.log("FLIGHTS :", response?.data.data);
       setFlightsResults(response?.data.data);
     } catch (error) {
       console.log(error);
@@ -118,9 +134,8 @@ const TripForm = () => {
   const handleSearchHotelsById = async () => {
     try {
       const response = await searchHotelById("MCLONGHM");
-      console.log("HOTEL", response.data[0]);
-      setHotelIdResult(response.data[0]);
-      console.log(hotelIdResult[0].hotel.name);
+      console.log("HOTEL :", response.data[0]);
+      setHotelIdResult(response.data);
     } catch (error) {
       console.log(error);
     }
@@ -158,29 +173,6 @@ const TripForm = () => {
 
   console.log(flightResults);
 
-  const timeFormatter = (time: string) => {
-    const isoDateTime = time;
-    const date = new Date(isoDateTime);
-
-    // Formater la date en anglais
-    const formattedDate = format(date, "eee, d MMMM yyyy", { locale: enUS });
-
-    // Formater l'heure
-    const formattedTime = format(date, "HH:mm");
-
-    return { formattedDate, formattedTime };
-  };
-
-  const formatCustomDuration = (duration: string) => {
-    const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
-    if (!match) return ""; // Si la durée n'est pas au format attendu, retourne une chaîne vide
-
-    const hours = match[1] ? parseInt(match[1], 10) : 0;
-    const minutes = match[2] ? parseInt(match[2], 10) : 0;
-
-    return `${hours}h${minutes.toString().padStart(2, "0")}`;
-  };
-
   return (
     <div>
       <div className="flex items-center justify-center gap-x-4">
@@ -188,13 +180,13 @@ const TripForm = () => {
           type="text"
           value={originLocation}
           onChange={(e) => setOriginLocation(e.target.value)}
-          placeholder="Choose an origin location"
+          placeholder="From"
         />
         <Input
           type="text"
           value={destinationLocation}
           onChange={(e) => setDestinationLocation(e.target.value)}
-          placeholder="Choose a destination location"
+          placeholder="To"
         />
         <Input
           value={locationName}
@@ -211,36 +203,126 @@ const TripForm = () => {
           </p>
         ))}
       {flightResults && flightResults.length > 0 && (
-        <div className="mt-8">
-          <h1 className="text-xl text-red-500">Flight</h1>
-          <div className="bg-white rounded-lg shadow-lg shadow-black/25 p-4 mt-2">
-            {/* <p className="text-green-500">{flightResults[0].price.currency}</p>
-      <h1>{flightResults[0].price.total}</h1> */}
-            <div className="flex justify-between w-full">
+        <div className="mt-8 space-y-4 mb-4">
+          <h1 className="text-3xl text-black font-bold">Flight</h1>
+          <Separator />
+          <div className="bg-black rounded-xl shadow-lg shadow-black/25 p-4 mt-2 border border-gray-400">
+            <div className="flex justify-center w-full">
               {flightResults[0].itineraries.map((itinerary, i) => (
                 <>
-                  <div key={i} className="">
+                  <div key={i} className="w-full">
                     {itinerary.segments.map((segment, j) => (
-                      <div key={j} className="flex items-start space-x-20">
-                        <div className="flex flex-col items-center">
-                          <p className="text-black">
-                            {timeFormatter(segment.arrival.at).formattedDate}
-                          </p>
-                          <p className="text-sm text-gray-400">
-                            {timeFormatter(segment.arrival.at).formattedTime}
-                          </p>
+                      <>
+                        <div key={j} className="w-full space-y-6">
+                          <div className="flex items-center justify-center space-x-8">
+                            <PlaneTakeoff className="text-white" />
+                            <h1 className="text-3xl text-white font-semibold tracking-wide">
+                              {segment.departure.iataCode}
+                            </h1>
+                            <MoveRight className="text-white" />
+                            <h1 className="text-3xl text-white font-semibold tracking-wide">
+                              {segment.arrival.iataCode}
+                            </h1>
+                            <PlaneLanding className="text-white" />
+                          </div>
+                          <Separator className="w-full" />
+                          <div className="flex-col items-center justify-between px-8 py-2">
+                            <div className="flex flex-col items-start my-2 space-y-2">
+                              <h2 className="text-white text-lg font-semibold">
+                                Departure
+                              </h2>
+                              <div className="flex items-center justify-between w-full">
+                                <ItemCard
+                                  title={"Airport"}
+                                  text={segment.departure.iataCode}
+                                  icon={
+                                    <Plane className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                                  }
+                                />
+                                <ItemCard
+                                  title={"Day"}
+                                  text={
+                                    timeFormatter(segment.departure.at)
+                                      .formattedDate
+                                  }
+                                  icon={
+                                    <Calendar className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                                  }
+                                />
+
+                                <ItemCard
+                                  title={"Time"}
+                                  text={
+                                    timeFormatter(segment.departure.at)
+                                      .formattedTime
+                                  }
+                                  icon={
+                                    <Clock className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                                  }
+                                />
+                              </div>
+                            </div>
+                            <Separator />
+                            <div className="flex flex-col items-start my-2 space-y-2">
+                              <h2 className="text-white text-lg font-semibold">
+                                Arrival
+                              </h2>
+                              <div className="flex items-center justify-between w-full">
+                                <ItemCard
+                                  title={"Airport"}
+                                  text={segment.arrival.iataCode}
+                                  icon={
+                                    <Plane className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                                  }
+                                />
+                                <ItemCard
+                                  title={"Day"}
+                                  text={
+                                    timeFormatter(segment.arrival.at)
+                                      .formattedDate
+                                  }
+                                  icon={
+                                    <Calendar className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                                  }
+                                />
+
+                                <ItemCard
+                                  title={"Time"}
+                                  text={
+                                    timeFormatter(segment.arrival.at)
+                                      .formattedTime
+                                  }
+                                  icon={
+                                    <Clock className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                                  }
+                                />
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex flex-col items-center space-y-4">
-                          <p className="text-xl">
-                            {segment.departure.iataCode}
-                          </p>
-                          <MoveDown />
-                          <p className="text-xl">{segment.arrival.iataCode}</p>
+                        <div className="flex items-center justify-between px-8 mt-3">
+                          <div className="flex items-center space-x-2">
+                            <Badge className="space-x-2">
+                              <Clock className="w-4 h-4" />
+                              <p className="text-md">
+                                {formatCustomDuration(itinerary.duration)}
+                              </p>
+                            </Badge>
+                            <Badge className="space-x-2">
+                              <Luggage className="w-4 h-4" />
+                              <p className="text-md">Included</p>
+                            </Badge>
+                          </div>
+                          <div className="flex items-end text-center">
+                            <h1 className="text-gray-200 text-2xl text-center font-semibold">
+                              {flightResults[0].price.currency}{" "}
+                              {flightResults[0].price.total} / person
+                            </h1>
+                          </div>
                         </div>
-                      </div>
+                      </>
                     ))}
                   </div>
-                  <p>{formatCustomDuration(itinerary.duration)}</p>
                 </>
               ))}
             </div>
@@ -248,13 +330,109 @@ const TripForm = () => {
         </div>
       )}
       {hotelResults && hotelResults.length > 0 && (
-        <div className="mt-4">
-          <h1 className="text-red-500 text-lg">Hotels :</h1>
-          <div className="bg-white rounded-lg shadow-lg shadow-black/25 p-4 mt-2">
-            <h1 className="">{hotelResults[0].name}</h1>
-            <h1 className="">{hotelResults[0].geoCode.latitude}</h1>
-            <h1 className="">{hotelResults[0].geoCode.longitude}</h1>
-            <p className="">{hotelResults[0].hotelId}</p>
+        <div className="mt-8 space-y-4 mb-4">
+          <h1 className="text-3xl text-black font-bold">Hotel</h1>
+          <Separator />
+
+          <div className="bg-black rounded-xl shadow-lg shadow-black/25 p-4 mt-2 border border-gray-400">
+            {hotelIdResult && hotelIdResult.length > 0 && (
+              <div className="flex-col items-center justify-center w-full">
+                <h1 className="flex justify-center text-2xl text-white my-2">
+                  {hotelIdResult[0].hotel.name}
+                </h1>
+                <Separator />
+                <div className="flex-col items-start m-4 py-4">
+                  <h1 className="text-white text-lg font-semibold">Details</h1>
+                  <div className="flex items-center justify-between">
+                    <ItemCard
+                      title={"From"}
+                      text={
+                        timeFormatter(hotelIdResult[0].offers[0].checkInDate)
+                          .formattedDate
+                      }
+                      icon={
+                        <Calendar className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                      }
+                    />
+
+                    <ItemCard
+                      title={"To"}
+                      text={
+                        timeFormatter(hotelIdResult[0].offers[0].checkInDate)
+                          .formattedDate
+                      }
+                      icon={
+                        <Calendar className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                      }
+                    />
+                    <ItemCard
+                      title={"Person"}
+                      text={"1"}
+                      icon={
+                        <UserRound className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                      }
+                    />
+                  </div>
+                  <Separator />
+                  <h1 className="text-white text-lg font-semibold">Room</h1>
+                  <div className="flex items-center justify-between">
+                    <ItemCard
+                      title={"Type Bed"}
+                      text={"Queen size"}
+                      icon={
+                        <Bed className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                      }
+                    />
+
+                    <ItemCard
+                      title={"To"}
+                      text={
+                        timeFormatter(hotelIdResult[0].offers[0].checkInDate)
+                          .formattedDate
+                      }
+                      icon={
+                        <Calendar className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                      }
+                    />
+                    <ItemCard
+                      title={"Person"}
+                      text={"1"}
+                      icon={
+                        <UserRound className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="flex-col justify-center items-center w-full px-4 rounded-full">
+                  <h1 className="text-white text-lg font-semibold">
+                    Emplacement
+                  </h1>
+                  <div className="relative w-full h-48 rounded-full">
+                    <MapCard
+                      latitude={hotelIdResult[0].hotel.latitude}
+                      longitude={hotelIdResult[0].hotel.longitude}
+                      name={hotelIdResult[0].hotel.name}
+                      address={""}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="">
+                    <Badge>CACA</Badge>
+                    <Badge>CACA</Badge> <Badge>CACA</Badge>
+                  </div>
+                  {hotelIdResult[0]?.offers[0]?.price ? (
+                    <p className="place-self-end text-2xl text-white">
+                      {hotelIdResult[0].offers[0].price.currency}{" "}
+                      {hotelIdResult[0].offers[0].price.total} / person
+                    </p>
+                  ) : (
+                    "Price not available"
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -39,8 +39,8 @@ function MapCard({ latitude, longitude, name, address }: MapCardProps) {
 
   // Viewport settings
   const INITIAL_VIEW_STATE = {
-    longitude: 2.33,
-    latitude: 48.86,
+    longitude: longitude,
+    latitude: latitude,
     zoom: 10,
     maxZoom: 16,
     pitch: 0,
@@ -51,32 +51,31 @@ function MapCard({ latitude, longitude, name, address }: MapCardProps) {
   const MAP_STYLE = "mapbox://styles/mapbox/standard";
 
   // Layers
-  const layer = () =>
-    new IconLayer({
-      id: "icon-layer",
-      pickable: true,
-      sizeScale: 11,
-      getIcon: (d) => ({
-        url: "/images/pin.png",
-        width: 128,
-        height: 128,
-      }),
-      getPosition: () => [longitude, latitude],
-      getSize: (d) => 5,
-    });
+  const layer = new IconLayer({
+    id: "icon-layer",
+    pickable: true,
+    sizeScale: 11,
+    getIcon: () => ({
+      url: "/images/pin.png",
+      width: 32,
+      height: 32,
+    }),
+    getPosition: [-0.15509, 51.50988],
+    getSize: 5,
+  });
 
   // Deck GL overlay
   const overlay = new DeckOverlay({
-    layers: [layer()],
+    layers: [layer],
   });
 
   return (
-    <div>
+    <div className="absolute w-full h-full">
       <DeckGL
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
-        layers={[layer()]}
-        getTooltip={() => `${name}\n${address}`}
+        layers={[layer]}
+        // getTooltip={() => `${name}\n${address}`}
       >
         <StaticMap
           mapboxAccessToken={MAPBOX_ACCESS_TOKEN}

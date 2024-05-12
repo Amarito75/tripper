@@ -39,8 +39,8 @@ export async function searchFlights(
         originLocationCode: originLocationCode,
         destinationLocationCode: destinationLocationCode,
         departureDateTimeRange: {
-          date: formattedDate,
-          time: formattedTime,
+          date: "2024-11-01",
+          time: "10:00:00",
         },
       },
     ],
