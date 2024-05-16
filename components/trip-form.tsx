@@ -30,6 +30,7 @@ import MapCard from "./map";
 import { Separator } from "./ui/separator";
 import { Badge } from "./ui/badge";
 import ItemCard from "./ui/item-icon-card";
+import { DatePicker } from "./ui/date-picker";
 
 interface FlightResults {
   lastTicketingDate: string;
@@ -229,6 +230,7 @@ const TripForm = () => {
           onChange={handleChange}
           placeholder="Search a city"
         />
+        <DatePicker />
 
         <Button onClick={onClick}>Search</Button>
       </div>
