@@ -18,32 +18,55 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-const frameworks = [
-  {
-    value: "next.js",
-    label: "Next.js",
-  },
-  {
-    value: "sveltekit",
-    label: "SvelteKit",
-  },
-  {
-    value: "nuxt.js",
-    label: "Nuxt.js",
-  },
-  {
-    value: "remix",
-    label: "Remix",
-  },
-  {
-    value: "astro",
-    label: "Astro",
-  },
+const cities = [
+  { label: "Paris", value: "PAR" },
+  { label: "New York", value: "NYC" },
+  { label: "London", value: "LON" },
+  { label: "Tokyo", value: "TYO" },
+  { label: "Dubai", value: "DXB" },
+  { label: "Los Angeles", value: "LAX" },
+  { label: "Sydney", value: "SYD" },
+  { label: "Singapore", value: "SIN" },
+  { label: "Beijing", value: "BJS" },
+  { label: "Moscow", value: "MOW" },
+  { label: "Istanbul", value: "IST" },
+  { label: "Rio de Janeiro", value: "RIO" },
+  { label: "Rome", value: "ROM" },
+  { label: "Toronto", value: "YTO" },
+  { label: "Cairo", value: "CAI" },
+  { label: "Mumbai", value: "BOM" },
+  { label: "Bangkok", value: "BKK" },
+  { label: "Berlin", value: "BER" },
+  { label: "Mexico City", value: "MEX" },
+  { label: "Madrid", value: "MAD" },
 ];
 
-export function Combobox() {
+interface City {
+  label: string;
+  value: string;
+}
+
+interface ComboboxProps {
+  value: string;
+  onChange: (value: string) => void;
+  onSelect: (value: string) => void;
+  onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export function Combobox({
+  value,
+  onChange,
+  onSelect,
+  onInputChange,
+}: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+
+  const handleSelect = (currentValue: string) => {
+    const newValue = currentValue === value ? "" : currentValue;
+    onChange(newValue);
+    onSelect(newValue);
+    setOpen(false);
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -55,32 +78,29 @@ export function Combobox() {
           className="w-[200px] justify-between"
         >
           {value
-            ? frameworks.find((framework) => framework.value === value)?.label
-            : "Select framework..."}
+            ? cities.find((city) => city.value === value)?.label
+            : "Select a city..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search framework..." />
-          <CommandEmpty>No framework found.</CommandEmpty>
+          <CommandInput placeholder="Search city..." onInput={onInputChange} />
+          <CommandEmpty>No city found.</CommandEmpty>
           <CommandGroup>
-            {frameworks.map((framework) => (
+            {cities.map((city: City) => (
               <CommandItem
-                key={framework.value}
-                value={framework.value}
-                onSelect={(currentValue) => {
-                  setValue(currentValue === value ? "" : currentValue);
-                  setOpen(false);
-                }}
+                key={city.value}
+                value={city.value}
+                onSelect={() => handleSelect(city.value)}
               >
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    value === framework.value ? "opacity-100" : "opacity-0"
+                    value === city.value ? "opacity-100" : "opacity-0"
                   )}
                 />
-                {framework.label}
+                {city.label}
               </CommandItem>
             ))}
           </CommandGroup>

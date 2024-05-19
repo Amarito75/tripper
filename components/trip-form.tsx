@@ -31,6 +31,7 @@ import { Separator } from "./ui/separator";
 import { Badge } from "./ui/badge";
 import ItemCard from "./ui/item-icon-card";
 import { DatePicker } from "./ui/date-picker";
+import { Combobox } from "./ui/combobox";
 
 interface FlightResults {
   lastTicketingDate: string;
@@ -204,8 +205,17 @@ const TripForm = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocationName(e.target.value);
-    getCoordinates(locationName);
-    getCoordinates;
+    getCoordinates(e.target.value);
+  };
+
+  const handleSelectOrigin = (value: string) => {
+    setOriginLocation(value);
+    getCoordinates(value);
+  };
+
+  const handleSelectDestination = (value: string) => {
+    setDestinationLocation(value);
+    getCoordinates(value);
   };
 
   console.log(flightResults);
@@ -213,25 +223,19 @@ const TripForm = () => {
   return (
     <div>
       <div className="flex items-center justify-center gap-x-4">
-        <Input
-          type="text"
+        <Combobox
           value={originLocation}
-          onChange={(e) => setOriginLocation(e.target.value)}
-          placeholder="From"
+          onChange={setOriginLocation}
+          onSelect={(value: string) => setOriginLocation(value)}
+          onInputChange={handleChange}
         />
-        <Input
-          type="text"
+        <Combobox
           value={destinationLocation}
-          onChange={(e) => setDestinationLocation(e.target.value)}
-          placeholder="To"
-        />
-        <Input
-          value={locationName}
-          onChange={handleChange}
-          placeholder="Search a city"
+          onChange={setDestinationLocation}
+          onSelect={(value: string) => setDestinationLocation(value)}
+          onInputChange={handleChange}
         />
         <DatePicker />
-
         <Button onClick={onClick}>Search</Button>
       </div>
       {searchResults &&
