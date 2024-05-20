@@ -193,6 +193,13 @@ const TripForm = () => {
     }
   };
 
+  const formattedFromDate = selectedDate?.from
+    ? format(selectedDate.from, "yyyy-MM-dd")
+    : "";
+  const formattedToDate = selectedDate?.to
+    ? format(selectedDate.to, "yyyy-MM-dd")
+    : "";
+
   const handleSearchFlights = async () => {
     const formattedFromDate = selectedDate?.from
       ? format(selectedDate.from, "yyyy-MM-dd")
@@ -283,7 +290,7 @@ const TripForm = () => {
 
   const handleSearchRestaurant = async () => {
     try {
-      const response = await searchRestaurant("Tokyo");
+      const response = await searchRestaurant(cityName);
       console.log(JSON.parse(response));
       setRestaurantsResults(JSON.parse(response));
     } catch (error) {
@@ -291,11 +298,9 @@ const TripForm = () => {
     }
   };
 
-  console.log(restaurantsResults);
-
   const handleSearchCoffee = async () => {
     try {
-      const response = await searchCoffee("Tokyo");
+      const response = await searchCoffee(cityName);
       setCoffeesResults(JSON.parse(response));
     } catch (error) {
       console.log(error);
@@ -325,6 +330,7 @@ const TripForm = () => {
     }
     if (cityName) {
       handleSearchCoffee();
+      handleSearchRestaurant();
     }
   }, [hotelId, latitude, longitude, cityName]);
 
@@ -637,10 +643,7 @@ const TripForm = () => {
                   <div className="flex items-center justify-between my-4">
                     <ItemCard
                       title={"From"}
-                      text={
-                        timeFormatter(hotelIdResult[0].offers[0].checkInDate)
-                          .formattedDate
-                      }
+                      text={formattedFromDate}
                       icon={
                         <Calendar className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
                       }
@@ -648,10 +651,7 @@ const TripForm = () => {
 
                     <ItemCard
                       title={"To"}
-                      text={
-                        timeFormatter(hotelIdResult[0].offers[0].checkInDate)
-                          .formattedDate
-                      }
+                      text={formattedToDate}
                       icon={
                         <Calendar className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
                       }
@@ -726,7 +726,7 @@ const TripForm = () => {
           <Separator />
           <div className="bg-black rounded-xl shadow-lg shadow-black/25 p-4 mt-2 border border-gray-400">
             <div className="flex-col items-center justify-center px-4 my-2">
-              <h1 className="text-xl text-white font-semibold py-1">
+              <h1 className="text-2xl text-white font-semibold py-1 flex justify-center">
                 {activitiesResults[2].name}
               </h1>
               <Separator />
