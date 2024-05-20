@@ -49,7 +49,7 @@ interface City {
 interface ComboboxProps {
   value: string;
   onChange: (value: string) => void;
-  onSelect: (value: string) => void;
+  onSelect: (value: string, label: string) => void;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -61,10 +61,10 @@ export function Combobox({
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
 
-  const handleSelect = (currentValue: string) => {
+  const handleSelect = (currentValue: string, label: string) => {
     const newValue = currentValue === value ? "" : currentValue;
     onChange(newValue);
-    onSelect(newValue);
+    onSelect(newValue, label); // Passer à la fois la valeur et le label
     setOpen(false);
   };
 
@@ -92,7 +92,7 @@ export function Combobox({
               <CommandItem
                 key={city.value}
                 value={city.value}
-                onSelect={() => handleSelect(city.value)}
+                onSelect={() => handleSelect(city.value, city.label)}
               >
                 <Check
                   className={cn(

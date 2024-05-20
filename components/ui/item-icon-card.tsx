@@ -2,7 +2,7 @@ import React from "react";
 
 interface ItemIconCardProps {
   title: string;
-  text: string;
+  text: string | number;
   icon: React.ReactNode;
 }
 

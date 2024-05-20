@@ -1,8 +1,11 @@
 import {
   searchActivities,
+  searchCityByKeyword,
+  searchCoffee,
   searchFlights,
   searchHotelById,
   searchHotels,
+  searchRestaurant,
 } from "@/services/tripper-api";
 import React, { useEffect, useState } from "react";
 import { Input } from "./ui/input";
@@ -17,13 +20,21 @@ import {
   MoveDown,
   MoveRight,
   PersonStanding,
+  PersonStandingIcon,
   Plane,
   PlaneLanding,
   PlaneTakeoff,
+  Star,
   UserRound,
   Users,
 } from "lucide-react";
-import { format, formatDate, formatDuration, parseISO } from "date-fns";
+import {
+  addDays,
+  format,
+  formatDate,
+  formatDuration,
+  parseISO,
+} from "date-fns";
 import { enUS } from "date-fns/locale";
 import { formatCustomDuration, timeFormatter } from "@/lib/formatter";
 import MapCard from "./map";
@@ -32,6 +43,7 @@ import { Badge } from "./ui/badge";
 import ItemCard from "./ui/item-icon-card";
 import { DatePicker } from "./ui/date-picker";
 import { Combobox } from "./ui/combobox";
+import { DateRange } from "react-day-picker";
 
 interface FlightResults {
   lastTicketingDate: string;
@@ -114,21 +126,59 @@ interface ActivitiesResults {
 }
 [];
 
+interface APIResult {
+  address: string;
+  description: string;
+  gps_coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  hours?: string;
+  lsig: string;
+  place_id: string;
+  place_id_search: string;
+  position: number;
+  rating: number;
+  reviews: number;
+  reviews_original: string;
+  thumbnail: string;
+  title: string;
+  type: string;
+  service_options?: {
+    dine_in?: boolean;
+    no_delivery?: boolean;
+    takeout?: boolean;
+  };
+}
+
+interface Results {
+  local_results: APIResult[];
+}
+
 const TripForm = () => {
   const [flightResults, setFlightsResults] = useState<FlightResults[]>([]);
+  const [coffeesResults, setCoffeesResults] = useState<Results>();
+  const [restaurantsResults, setRestaurantsResults] = useState<Results>();
+  const [returnFlightsResults, setReturnFlightsResults] = useState<
+    FlightResults[]
+  >([]);
   const [hotelResults, setHotelResults] = useState<HotelsResults[]>([]);
   const [hotelIdResult, setHotelIdResult] = useState<HotelIdResult[]>([]);
   const [activitiesResults, setActivitiesResults] = useState<
     ActivitiesResults[]
   >([]);
-
+  const [cityName, setCityName] = useState("");
   const [originLocation, setOriginLocation] = useState("");
   const [destinationLocation, setDestinationLocation] = useState("");
+  const [keyword, setKeyword] = useState("");
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
   const [searchResults, setSearchResults] = useState<SearchResults[]>([]);
   const [locationName, setLocationName] = useState("");
   const [hotelId, setHotelId] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<DateRange | undefined>(
+    undefined
+  );
 
   const getCoordinates = async (locationName: string) => {
     try {
@@ -144,11 +194,18 @@ const TripForm = () => {
   };
 
   const handleSearchFlights = async () => {
+    const formattedFromDate = selectedDate?.from
+      ? format(selectedDate.from, "yyyy-MM-dd")
+      : "";
+    const formattedToDate = selectedDate?.to
+      ? format(selectedDate.to, "yyyy-MM-dd")
+      : "";
     try {
       const response = await searchFlights(
         originLocation,
         destinationLocation,
-        "ECONOMY"
+        "ECONOMY",
+        formattedFromDate
       );
       console.log("FLIGHTS :", response?.data.data);
       setFlightsResults(response?.data.data);
@@ -157,12 +214,22 @@ const TripForm = () => {
     }
   };
 
-  const handleSearchActivities = async () => {
+  const handleSearchReturnFlights = async () => {
+    const formattedFromDate = selectedDate?.from
+      ? format(selectedDate.from, "yyyy-MM-dd")
+      : "";
+    const formattedToDate = selectedDate?.to
+      ? format(selectedDate.to, "yyyy-MM-dd")
+      : "";
     try {
-      const response = await searchActivities(51.50988, -0.15509, 1);
-      console.log("ACTIVITES: ", response?.data.data);
-      setActivitiesResults(response?.data?.data);
-      console.log(typeof activitiesResults);
+      const response = await searchFlights(
+        destinationLocation,
+        originLocation,
+        "ECONOMY",
+        formattedToDate
+      );
+      console.log("FLIGHTS :", response?.data.data);
+      setReturnFlightsResults(response?.data.data);
     } catch (error) {
       console.log(error);
     }
@@ -170,9 +237,22 @@ const TripForm = () => {
 
   const handleSearchHotelsById = async () => {
     try {
-      const response = await searchHotelById("MCLONGHM");
+      const response = await searchHotelById(hotelId);
       console.log("HOTEL :", response.data[0]);
       setHotelIdResult(response.data);
+      setLongitude(response.data[0].hotel.longitude);
+      setLatitude(response.data[0].hotel.latitude);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleSearchActivities = async () => {
+    try {
+      const response = await searchActivities(latitude, longitude, 5);
+      console.log("ACTIVITES: ", response?.data.data);
+      setActivitiesResults(response?.data?.data);
+      console.log(typeof activitiesResults);
     } catch (error) {
       console.log(error);
     }
@@ -191,34 +271,67 @@ const TripForm = () => {
     }
   };
 
+  const handleSearchCity = async () => {
+    try {
+      const response = await searchCityByKeyword(keyword);
+      console.log(response.data[0].name);
+      setCityName(response.data[0].name);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleSearchRestaurant = async () => {
+    try {
+      const response = await searchRestaurant("Tokyo");
+      console.log(JSON.parse(response));
+      setRestaurantsResults(JSON.parse(response));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  console.log(restaurantsResults);
+
+  const handleSearchCoffee = async () => {
+    try {
+      const response = await searchCoffee("Tokyo");
+      setCoffeesResults(JSON.parse(response));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const onClick = () => {
     handleSearchFlights();
+    handleSearchReturnFlights();
     handleSearchHotels();
-    handleSearchActivities();
+    handleSearchCity();
+    if (latitude && longitude) {
+      handleSearchActivities();
+    }
+    if (keyword && cityName) {
+      handleSearchCoffee();
+      handleSearchRestaurant();
+    }
   };
 
   useEffect(() => {
     if (hotelId) {
       handleSearchHotelsById();
     }
-  }, [hotelId]);
+    if (latitude && longitude) {
+      handleSearchActivities();
+    }
+    if (cityName) {
+      handleSearchCoffee();
+    }
+  }, [hotelId, latitude, longitude, cityName]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLocationName(e.target.value);
     getCoordinates(e.target.value);
   };
-
-  const handleSelectOrigin = (value: string) => {
-    setOriginLocation(value);
-    getCoordinates(value);
-  };
-
-  const handleSelectDestination = (value: string) => {
-    setDestinationLocation(value);
-    getCoordinates(value);
-  };
-
-  console.log(flightResults);
 
   return (
     <div>
@@ -226,16 +339,24 @@ const TripForm = () => {
         <Combobox
           value={originLocation}
           onChange={setOriginLocation}
-          onSelect={(value: string) => setOriginLocation(value)}
+          onSelect={(value: string) => {
+            setOriginLocation(value);
+          }}
           onInputChange={handleChange}
         />
         <Combobox
           value={destinationLocation}
           onChange={setDestinationLocation}
-          onSelect={(value: string) => setDestinationLocation(value)}
+          onSelect={(value: string, label: string) => {
+            setDestinationLocation(value);
+            setKeyword(label);
+          }}
           onInputChange={handleChange}
         />
-        <DatePicker />
+        <DatePicker
+          selectedDate={selectedDate}
+          onDateChange={setSelectedDate}
+        />{" "}
         <Button onClick={onClick}>Search</Button>
       </div>
       {searchResults &&
@@ -371,6 +492,134 @@ const TripForm = () => {
           </div>
         </div>
       )}
+      {returnFlightsResults && returnFlightsResults.length > 0 && (
+        <div className="mt-8 space-y-4 mb-4">
+          <h1 className="text-3xl text-black font-bold">Flight</h1>
+          <Separator />
+          <div className="bg-black rounded-xl shadow-lg shadow-black/25 p-4 mt-2 border border-gray-400">
+            <div className="flex justify-center w-full">
+              {returnFlightsResults[0].itineraries.map((itinerary, i) => (
+                <>
+                  <div key={i} className="w-full">
+                    {itinerary.segments.map((segment, j) => (
+                      <>
+                        <div key={j} className="w-full space-y-6">
+                          <div className="flex items-center justify-center space-x-8">
+                            <PlaneTakeoff className="text-white" />
+                            <h1 className="text-3xl text-white font-semibold tracking-wide">
+                              {segment.departure.iataCode}
+                            </h1>
+                            <MoveRight className="text-white" />
+                            <h1 className="text-3xl text-white font-semibold tracking-wide">
+                              {segment.arrival.iataCode}
+                            </h1>
+                            <PlaneLanding className="text-white" />
+                          </div>
+                          <Separator className="w-full" />
+                          <div className="flex-col items-center justify-between px-8 py-2">
+                            <div className="flex flex-col items-start my-2 space-y-2">
+                              <h2 className="text-white text-lg font-semibold">
+                                Departure
+                              </h2>
+                              <div className="flex items-center justify-between w-full">
+                                <ItemCard
+                                  title={"Airport"}
+                                  text={segment.departure.iataCode}
+                                  icon={
+                                    <Plane className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                                  }
+                                />
+                                <ItemCard
+                                  title={"Day"}
+                                  text={
+                                    timeFormatter(segment.departure.at)
+                                      .formattedDate
+                                  }
+                                  icon={
+                                    <Calendar className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                                  }
+                                />
+
+                                <ItemCard
+                                  title={"Time"}
+                                  text={
+                                    timeFormatter(segment.departure.at)
+                                      .formattedTime
+                                  }
+                                  icon={
+                                    <Clock className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                                  }
+                                />
+                              </div>
+                            </div>
+                            <Separator />
+                            <div className="flex flex-col items-start my-2 space-y-2">
+                              <h2 className="text-white text-lg font-semibold">
+                                Arrival
+                              </h2>
+                              <div className="flex items-center justify-between w-full">
+                                <ItemCard
+                                  title={"Airport"}
+                                  text={segment.arrival.iataCode}
+                                  icon={
+                                    <Plane className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                                  }
+                                />
+                                <ItemCard
+                                  title={"Day"}
+                                  text={
+                                    timeFormatter(segment.arrival.at)
+                                      .formattedDate
+                                  }
+                                  icon={
+                                    <Calendar className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                                  }
+                                />
+
+                                <ItemCard
+                                  title={"Time"}
+                                  text={
+                                    timeFormatter(segment.arrival.at)
+                                      .formattedTime
+                                  }
+                                  icon={
+                                    <Clock className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                                  }
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between px-8 mt-3">
+                          <div className="flex items-center space-x-2">
+                            <Badge className="space-x-2">
+                              <Clock className="w-4 h-4" />
+                              <p className="text-md">
+                                {formatCustomDuration(itinerary.duration)}
+                              </p>
+                            </Badge>
+                            <Badge className="space-x-2">
+                              <Luggage className="w-4 h-4" />
+                              <p className="text-md">Included</p>
+                            </Badge>
+                          </div>
+                          <div className="flex items-end text-center">
+                            <h1 className="text-gray-200 text-2xl text-center font-semibold">
+                              {flightResults[0]?.price.currency}{" "}
+                              {flightResults[0]?.price.total} / person
+                            </h1>
+                          </div>
+                        </div>
+                      </>
+                    ))}
+                  </div>
+                </>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {hotelResults && hotelResults.length > 0 && (
         <div className="mt-8 space-y-4 mb-4">
           <h1 className="text-3xl text-black font-bold">Hotel</h1>
@@ -456,15 +705,11 @@ const TripForm = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between px-4 my-4 ">
-                  <div className="z-50">
-                    <Badge>CACA</Badge>
-                    <Badge>CACA</Badge> <Badge>CACA</Badge>
-                  </div>
+                <div className="flex justify-end px-4 my-4 ">
                   {hotelIdResult[0]?.offers[0]?.price ? (
                     <p className="place-self-end text-2xl text-white">
                       {hotelIdResult[0].offers[0].price.currency}{" "}
-                      {hotelIdResult[0].offers[0].price.total} / person
+                      {hotelIdResult[0].offers[0].price.total} / night
                     </p>
                   ) : (
                     "Price not available"
@@ -482,7 +727,7 @@ const TripForm = () => {
           <div className="bg-black rounded-xl shadow-lg shadow-black/25 p-4 mt-2 border border-gray-400">
             <div className="flex-col items-center justify-center px-4 my-2">
               <h1 className="text-xl text-white font-semibold py-1">
-                {activitiesResults[0].name}
+                {activitiesResults[2].name}
               </h1>
               <Separator />
               <h2 className="text-white text-xl font-semibold my-4 place-self-start">
@@ -491,7 +736,7 @@ const TripForm = () => {
               <div className="flex items-center justify-between">
                 <ItemCard
                   title={"Duration"}
-                  text={activitiesResults[0].minimumDuration}
+                  text={activitiesResults[2].minimumDuration}
                   icon={
                     <Clock className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
                   }
@@ -526,14 +771,241 @@ const TripForm = () => {
               </div>
               <div className="flex justify-end my-2">
                 <h1 className="text-2xl text-white">
-                  {activitiesResults[0].price.currencyCode}{" "}
-                  {activitiesResults[0].price.amount} / person
+                  {activitiesResults[0].price.currencyCode &&
+                  activitiesResults[0].price.amount
+                    ? `${activitiesResults[0].price.currencyCode} ${activitiesResults[0].price.amount} / person`
+                    : "FREE"}
                 </h1>
               </div>
             </div>
           </div>
         </div>
       )}
+      {coffeesResults &&
+        coffeesResults.local_results &&
+        coffeesResults.local_results.length > 0 && (
+          <div className="mt-8 space-y-4 mb-4">
+            <h1 className="text-3xl text-black font-bold">Coffee</h1>
+            <Separator />
+            <div className="bg-black rounded-xl shadow-lg shadow-black/25 p-4 mt-2 border border-gray-400">
+              <h1 className="text-white text-xl flex justify-center my-2">
+                {coffeesResults.local_results[0].title}
+              </h1>
+              <Separator />
+              <h2 className="text-white text-xl my-2">Details</h2>
+              <div className="flex justify-between items-center">
+                <ItemCard
+                  title={"Open hours"}
+                  text={coffeesResults.local_results[0].hours || ""}
+                  icon={
+                    <Clock className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                  }
+                />
+                <ItemCard
+                  title={"Rating"}
+                  text={`${coffeesResults.local_results[0].rating || 0}/5`}
+                  icon={
+                    <Star className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                  }
+                />
+                <ItemCard
+                  title={"Reviews"}
+                  text={coffeesResults.local_results[0].reviews || ""}
+                  icon={
+                    <PersonStandingIcon className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                  }
+                />
+              </div>
+              <h2 className="text-white text-xl my-2">Emplacement</h2>
+              <div className="relative w-full h-48 rounded-full">
+                <MapCard
+                  latitude={
+                    coffeesResults?.local_results[0]?.gps_coordinates.latitude
+                  }
+                  longitude={
+                    coffeesResults?.local_results[0]?.gps_coordinates.longitude
+                  }
+                  name={""}
+                  address={""}
+                />
+              </div>
+              <div className="flex justify-end my-2">
+                <h3 className="text-white text-xl z-50 py-2">
+                  {coffeesResults.local_results[0]?.address}
+                </h3>
+              </div>
+            </div>
+          </div>
+        )}
+      {coffeesResults &&
+        coffeesResults.local_results &&
+        coffeesResults.local_results.length > 0 && (
+          <div className="mt-8 space-y-4 mb-4">
+            <div className="bg-black rounded-xl shadow-lg shadow-black/25 p-4 mt-2 border border-gray-400">
+              <h1 className="text-white text-xl flex justify-center my-2">
+                {coffeesResults.local_results[1].title}
+              </h1>
+              <Separator />
+              <h2 className="text-white text-xl my-2">Details</h2>
+              <div className="flex justify-between items-center">
+                <ItemCard
+                  title={"Open hours"}
+                  text={coffeesResults.local_results[1].hours || ""}
+                  icon={
+                    <Clock className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                  }
+                />
+                <ItemCard
+                  title={"Rating"}
+                  text={`${coffeesResults.local_results[1].rating || 0}/5`}
+                  icon={
+                    <Star className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                  }
+                />
+                <ItemCard
+                  title={"Reviews"}
+                  text={coffeesResults.local_results[1].reviews || ""}
+                  icon={
+                    <PersonStandingIcon className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                  }
+                />
+              </div>
+              <h2 className="text-white text-xl my-2">Emplacement</h2>
+              <div className="relative w-full h-48 rounded-full">
+                <MapCard
+                  latitude={
+                    coffeesResults?.local_results[1]?.gps_coordinates.latitude
+                  }
+                  longitude={
+                    coffeesResults?.local_results[1]?.gps_coordinates.longitude
+                  }
+                  name={""}
+                  address={""}
+                />
+              </div>
+              <div className="flex justify-end my-2">
+                <h3 className="text-white text-xl z-50 py-2">
+                  {coffeesResults.local_results[0]?.address}
+                </h3>
+              </div>
+            </div>
+          </div>
+        )}
+
+      {restaurantsResults &&
+        restaurantsResults.local_results &&
+        restaurantsResults.local_results.length > 0 && (
+          <div className="mt-8 space-y-4 mb-4">
+            <h1 className="text-3xl text-black font-bold">Restaurant</h1>
+            <Separator />
+            <div className="bg-black rounded-xl shadow-lg shadow-black/25 p-4 mt-2 border border-gray-400">
+              <h1 className="text-white text-xl flex justify-center my-2">
+                {restaurantsResults.local_results[0].title}
+              </h1>
+              <Separator />
+              <h2 className="text-white text-xl my-2">Details</h2>
+              <div className="flex justify-between items-center">
+                <ItemCard
+                  title={"Open hours"}
+                  text={restaurantsResults.local_results[0].hours || ""}
+                  icon={
+                    <Clock className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                  }
+                />
+                <ItemCard
+                  title={"Rating"}
+                  text={`${restaurantsResults.local_results[0].rating || 0}/5`}
+                  icon={
+                    <Star className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                  }
+                />
+                <ItemCard
+                  title={"Reviews"}
+                  text={restaurantsResults.local_results[0].reviews || ""}
+                  icon={
+                    <PersonStandingIcon className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                  }
+                />
+              </div>
+              <h2 className="text-white text-xl my-2">Emplacement</h2>
+              <div className="relative w-full h-48 rounded-full">
+                <MapCard
+                  latitude={
+                    restaurantsResults?.local_results[0]?.gps_coordinates
+                      .latitude
+                  }
+                  longitude={
+                    restaurantsResults?.local_results[0]?.gps_coordinates
+                      .longitude
+                  }
+                  name={""}
+                  address={""}
+                />
+              </div>
+              <div className="flex justify-end my-2">
+                <h3 className="text-white text-xl z-50 py-2">
+                  {restaurantsResults.local_results[0]?.address}
+                </h3>
+              </div>
+            </div>
+          </div>
+        )}
+      {restaurantsResults &&
+        restaurantsResults.local_results &&
+        restaurantsResults.local_results.length > 0 && (
+          <div className="mt-8 space-y-4 mb-4">
+            <div className="bg-black rounded-xl shadow-lg shadow-black/25 p-4 mt-2 border border-gray-400">
+              <h1 className="text-white text-xl flex justify-center my-2">
+                {restaurantsResults.local_results[1].title}
+              </h1>
+              <Separator />
+              <h2 className="text-white text-xl my-2">Details</h2>
+              <div className="flex justify-between items-center">
+                <ItemCard
+                  title={"Open hours"}
+                  text={restaurantsResults.local_results[1].hours || ""}
+                  icon={
+                    <Clock className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                  }
+                />
+                <ItemCard
+                  title={"Rating"}
+                  text={`${restaurantsResults.local_results[1].rating || 0}/5`}
+                  icon={
+                    <Star className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                  }
+                />
+                <ItemCard
+                  title={"Reviews"}
+                  text={restaurantsResults.local_results[1].reviews || ""}
+                  icon={
+                    <PersonStandingIcon className="text-white w-9 h-9 p-2 rounded-md bg-primary" />
+                  }
+                />
+              </div>
+              <h2 className="text-white text-xl my-2">Emplacement</h2>
+              <div className="relative w-full h-48 rounded-full">
+                <MapCard
+                  latitude={
+                    restaurantsResults?.local_results[1]?.gps_coordinates
+                      .latitude
+                  }
+                  longitude={
+                    restaurantsResults?.local_results[1]?.gps_coordinates
+                      .longitude
+                  }
+                  name={""}
+                  address={""}
+                />
+              </div>
+              <div className="flex justify-end my-2">
+                <h3 className="text-white text-xl z-50 py-2">
+                  {restaurantsResults.local_results[1]?.address}
+                </h3>
+              </div>
+            </div>
+          </div>
+        )}
     </div>
   );
 };

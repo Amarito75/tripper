@@ -26,7 +26,8 @@ export async function searchActivities(
 export async function searchFlights(
   originLocationCode: string,
   destinationLocationCode: string,
-  cabin: string
+  cabin: string,
+  date: string
 ) {
   const currentTimestamp = Date.now();
   const formattedDate = moment(currentTimestamp).format("YYYY-MM-DD");
@@ -39,7 +40,7 @@ export async function searchFlights(
         originLocationCode: originLocationCode,
         destinationLocationCode: destinationLocationCode,
         departureDateTimeRange: {
-          date: "2024-11-01",
+          date: date,
           time: "10:00:00",
         },
       },
@@ -107,6 +108,46 @@ export async function searchHotelById(hotelId: string | null) {
           Authorization: `Bearer ${token}`,
         },
       }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function searchCityByKeyword(keyword: string) {
+  try {
+    const response = await axios.get(
+      `https://test.api.amadeus.com/v1/reference-data/locations/cities?keyword=${keyword}&max=10`,
+      {
+        headers: {
+          // "X-HTTP-Method-Override": "GET",
+          // "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function searchCoffee(cityName: string) {
+  try {
+    const response = await axios.get(
+      `https://tripper-rs-production.up.railway.app/coffees/${cityName}`
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function searchRestaurant(cityName: string) {
+  try {
+    const response = await axios.get(
+      `https://tripper-rs-production.up.railway.app/restaurants/${cityName}`
     );
     return response.data;
   } catch (error) {
